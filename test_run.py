@@ -10,6 +10,7 @@ pipeline.load_documents(["sample.pdf"])   # make sure file exists
 pipeline.process_documents()
 
 print("✅ Pipeline ready. You can now ask questions.")
+print(f"ℹ️  Similarity threshold: {pipeline.config.similarity_threshold}")
 
 # Ask question
 while True:
@@ -21,12 +22,13 @@ while True:
     response = pipeline.query(query)
 
     if response["type"] == "relevant":
-        print("\n✅ ANSWER FOUND:")
+        print(f"\n✅ ANSWER FOUND  (best similarity: {response['max_similarity']:.2%})")
         for i, doc in enumerate(response["results"], 1):
-            print(f"\nResult {i}:")
+            cos = doc.get("cosine_similarity", 0)
+            print(f"\nResult {i} (cosine: {cos:.2%}):")
             print(doc["content"][:300])  # preview
 
     elif response["type"] == "fallback":
-        print("\n⚠️ FALLBACK TRIGGERED")
-        print("Keywords:", response["keywords"])
-        print("Suggestions:", response["suggestions"])
+        print(f"\n⚠️ FALLBACK TRIGGERED  (best similarity: {response['max_similarity']:.2%})")
+        print(response["message"])
+        print("Keywords:", response.get("keywords", []))
